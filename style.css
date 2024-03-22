@@ -5,5 +5,45 @@
 }
 
 h1 {
-  color: red;
+  font-size: 2.5rem;
+}
+body {
+  background: linear-gradient(
+    to right,
+    rgb(100, 153, 206),
+    rgb(67, 119, 171),
+    rgb(41, 88, 135)
+  );
+}
+.container {
+  border: 2px solid black;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.board {
+  background-color: bisque;
+  height: 700px;
+  width: 700px;
+  margin: 0 auto;
+  border: 4px solid black;
+
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+}
+.grid-cell {
+  border: 1px solid black;
+  font-size: 3rem;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.display-game-status {
+  font-size: 1.25rem;
+  font-weight: 700;
 }
