@@ -1,3 +1,3 @@
 # odin-TicTacToe
 
-This my attempt at making a Tic Tac Toe game using html,css,JavaScript.
+This is my attempt at making a Tic Tac Toe game using html,css,JavaScript.
