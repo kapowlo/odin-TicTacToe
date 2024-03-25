@@ -30,7 +30,11 @@ body {
   border: 4px solid black;
 
   display: grid;
-  grid-template-columns: repeat(3, auto);
+  /*when I was clicking on the grid cell to add x or o that specific cell would get a bit bigger and push the other cells.
+  replacing the second parameter auto with 1fr and putting in a size of 1fr for the rows solves this issue
+  */
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
 }
 .grid-cell {
   border: 1px solid black;
@@ -46,4 +50,16 @@ body {
 .display-game-status {
   font-size: 1.25rem;
   font-weight: 700;
+}
+
+.restartBtn {
+  padding: 6px 8px;
+  width: 200px;
+  border-radius: 6px;
+}
+
+.restartBtn:hover,
+.restartBtn:focus {
+  cursor: pointer;
+  box-shadow: 0px 9px 30px 0px rgba(0, 0, 0, 1);
 }
