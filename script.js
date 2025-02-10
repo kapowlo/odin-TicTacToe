@@ -14,115 +14,117 @@ to access  grid cells from inside of i had to make gridCells a global variable
 same with statusDiv i need to be able to access it from anywhere so i can modify the
 text message based game status who's turn it is and later on who won or if there's a draw
  */
-const boardDiv=document.getElementById("board") 
-const gridCells=document.querySelectorAll(".grid-cell");
-const statusDiv=document.querySelector(".display-game-status")
+const boardDiv = document.getElementById("board");
+const gridCells = document.querySelectorAll(".grid-cell");
+const statusDiv = document.querySelector(".display-game-status");
+const restartBtn = document.querySelector(".restartBtn");
 
-/*contains the loop that allows the user to drop an x or o on the board 
-contains the restart button to remove all 'x' and 'o' on the board, then reinitializes the board
-create a GameFlow object to access the playGame method
-create a ScreenDisplay object to access displayTurn method
-*/
-function Gameboard(){
-   
-    const gameFlow= GameFlow()
-    const screen=ScreenDisplay()
-    const restartBtn=document.querySelector(".restartBtn")  
-    restartBtn.addEventListener("click",reinitializeGame)
+function Gameboard() {
+    const gameFlow = GameFlow();
+    const screen = ScreenDisplay();
+    let options = ["", "", "", "", "", "", "", "", ""];
+    let gameActive = true; //flag to control the game flow
 
-   
-   //loop through gridCells and add an eventlistener
-   gridCells.forEach((cell)=>{
-        cell.addEventListener("click",(e)=>{
-            e.target.textContent=gameFlow.getActivePlayer().mark
-            screen.displayTurn()
-            gameFlow.playGame()
-            
-        })
-       
-})
-
-
-}
-
-/*mostly in charge of controlling the flow of the game, like switching players turn
-and contains the players which is an array of 2 objects(dict/hashmap)
-*/
-function GameFlow(){
-    const players=[
-        {
-            name:"player1",
-            mark:"X"
-        },
-        {
-            name:"player2",
-            mark:"O"
+    restartBtn.addEventListener("click", reinitializeGame);
+    
+    gridCells.forEach((cell, index) => {
+        // Only add event listeners if the game is still active
+        if (gameActive) {
+            cell.addEventListener("click", (e) => {
+                if (options[index] === "" && gameActive) {
+                   // Check if the current position in the options array is empty and if the game is still active
+                    e.target.textContent = gameFlow.getActivePlayer().mark;
+                    options[index] = gameFlow.getActivePlayer().mark; // update the board state
+                    statusDiv.textContent = `${gameFlow.getActivePlayer().name}'s turn `;
+                    
+                    if (checkWinner(options, gameFlow)) {
+                        screen.displayWinner(gameFlow.getActivePlayer().name);
+                        gameActive = false; // Set the flag to false, preventing further moves
+                    } else if (options.every(cell => cell !== "")) {
+                        screen.displayDraw(); // Check for draw if board is full
+                        gameActive = false; // End the game if it's a draw
+                    } else {
+                        gameFlow.switchPlayer();
+                        screen.displayTurn();
+                    }
+                }
+            });
         }
-    ]
-    let activePlayer=players[0];
-    const switchPlayer=()=>{
-        return activePlayer=activePlayer===players[0] ?players[1] :players[0];
-    }
-    const getActivePlayer=()=>{
-        return activePlayer;
-    }
+    });
+}
 
-   /*  const printNewRound=()=>{
-        console.log(`${getActivePlayer().name} put your mark`);
-    } */
+function GameFlow() {
+    const players = [
+        { name: "Player 1", mark: "X" },
+        { name: "Player 2", mark: "O" }
+    ];
+    let activePlayer = players[0]; // player 1 starts
+
+    const switchPlayer = () => {
+        activePlayer = activePlayer === players[0] ? players[1] : players[0]; //switches the value of activePlayer variable which is an object
+    };
+
+    const getActivePlayer = () => activePlayer;
+
+    return { getActivePlayer, switchPlayer };
+}
+
+function ScreenDisplay() {
+
+    const displayWinner = (winnerName) => {
+        statusDiv.textContent = `${winnerName} wins!`;
+    };
+
+    const displayDraw = () => {
+        statusDiv.textContent = "It's a draw!";
+    };
+
+    const displayTurn = () => {
+        statusDiv.textContent = `${gameFlow.getActivePlayer().name}'s turn (${gameFlow.getActivePlayer().mark})`;
+    };
+
+    return { displayWinner, displayDraw, displayTurn };
+}
+
+function checkWinner(board, gameFlow) {
+    //func checks if there's a winning combination on the Tic-Tac-Toe board
+    // each sub array contains three indices that represent a winning combo
+    const winCondition = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+    ];
+
+    for (let condition of winCondition) {
+    // loop through array of wincondition so first iteration [0,1,2] second [3,4,5]
+    // Destructure the condition array into three variables (a, b, c) representing the indices of the winning positions
+    // For example, in the first iteration: a = 0, b = 1, c = 2; in the second iteration: a = 3, b = 4, c = 5
+        const [a, b, c] = condition;
+        if (board[a] !== "" && board[a] === board[b] && board[a] === board[c]) {
+            //if the board array at the index a is not empty check if three cells match,if its empty then conditional test is skipped
+            alert(`${gameFlow.getActivePlayer().name} won! \n click on restart to play again`);
+            return true;
+        }
+    }
+    return false;
+}
+
+function reinitializeGame() {
+    console.log("Reinitializing board...");
     
-    const playGame=()=>{
-        //call switchPlayer before displaying console message
-        switchPlayer();
-        console.log(`time for ${getActivePlayer().name} to put an '${getActivePlayer().mark}' on the board`)
-       
-        
-    }
-   
-   
-// these exposed methods can be accessed when I make a GameFlow object obj=GameFlow() obj.getActivePlayer()
-   return{
-    getActivePlayer,
-    playGame,
-    switchPlayer
-   }
+    // Clear the board and reset the display
+    gridCells.forEach(cell => {
+        cell.textContent = "";
+    });
+    statusDiv.textContent = "";
+
+    // Call Gameboard to start a new game, reset game state (including options)
+    Gameboard();
 }
 
-/* will be in charge of displaying message to the webpage 
-the different message like who's turn it is and eventually who won or if its a draw
-will be displayed inside of the statusDiv.
-gameflow obj will have access to Gameflow methods like
- switchPlayer and another to a future method that will checkforwins or draws and display some msg on the statusDiv
-*/
-function ScreenDisplay(){
-    const gameFlow=GameFlow();
-   
-    
-    const displayTurn =()=>{
-        //when calling getActivePlayer method from GameFlow must call switchPlayer() first otherwise statusDiv shows incorrect info
-        gameFlow.switchPlayer()
-        statusDiv.textContent=gameFlow.getActivePlayer().name;
-        
-        
-    }
-
-    return{
-        displayTurn
-    }
-}
-
-
-/*simple func to re-start the game by making each grid cell = to an empty str
-then calls Gameboard to restart the game properly (player1 x should always be starting)*/
-function reinitializeGame(){
-    console.log("hello reinitializing board in 3 2 1...");
-    gridCells.forEach(cell=>{
-        cell.textContent=""
-    })
-    statusDiv.textContent=""
-    Gameboard()
-}
-
-
-Gameboard();
-/* GameFlow(); */
+Gameboard(); // Start the initial game
